@@ -90,5 +90,43 @@ handlers._users.post = (data, callback) => {
   }
 };
 
+// Users - get
+// Required data: phone
+// Optional data: None
+// @TODO: Only let an authorized user access their object. Don't let them access anyone else data
+handlers._users.get = (data, callback) => {
+  // Check that the phone number is valid
+  var phone =
+    typeof data.queryString.phone == "string" &&
+    data.queryString.phone.trim().length == 10
+      ? data.queryString.phone.trim()
+      : false;
+
+  if (phone) {
+    // Lookup he user
+    _data.read("users", phone, (err, data) => {
+      if (!err && data) {
+        // remove the hashed password from the user object before returning it to the requester
+        delete data.hashedPassword;
+        callback(200, data);
+      } else {
+        callback(400, { Error: "User not found" });
+      }
+    });
+  } else {
+    callback(400, { Error: "Missing required field" });
+  }
+};
+
+// Ping handler
+handlers.ping = (data, callback) => {
+  callback(200);
+};
+
+// Not found
+handlers.notFound = (data, callback) => {
+  callback(404);
+};
+
 // Export the handlers
 module.exports = handlers;

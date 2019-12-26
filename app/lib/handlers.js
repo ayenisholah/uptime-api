@@ -185,6 +185,39 @@ handlers._users.put = (data, callback) => {
   }
 };
 
+// Users - delete
+// Required data : phone
+// Optional data: none
+// @TODO only let an authenticated user delete their own object. Don't let them delete anyone else's
+// @TODO Cleanup (delete) any other files associatedwith the user
+handlers._users.delete = (data, callback) => {
+  // Check that the phone number is valid
+  var phone =
+    typeof data.queryString.phone == "string" &&
+    data.queryString.phone.trim().length == 10
+      ? data.queryString.phone.trim()
+      : false;
+
+  if (phone) {
+    // Lookup he user
+    _data.read("users", phone, (err, data) => {
+      if (!err && data) {
+        _data.delete("users", phone, (err, data) => {
+          if (!err) {
+            callback(200, { Message: "user deleted successfully" });
+          } else {
+            callback(500, { error: "could not delete the specified user" });
+          }
+        });
+      } else {
+        callback(400, { Error: "Could not find the specified user" });
+      }
+    });
+  } else {
+    callback(400, { Error: "Missing required field" });
+  }
+};
+
 // Ping handler
 handlers.ping = (data, callback) => {
   callback(200);

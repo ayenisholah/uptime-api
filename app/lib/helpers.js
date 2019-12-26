@@ -22,4 +22,14 @@ helpers.hash = str => {
   }
 };
 
-
+// Parse a JSON string to an object in all cases, without throwing
+helpers.parseJsonToObject = str => {
+  try {
+    var obj = JSON.parse(str);
+    return obj;
+  } catch (error) {
+    return {};
+  }
+};
+// Export the container
+module.exports = helpers;

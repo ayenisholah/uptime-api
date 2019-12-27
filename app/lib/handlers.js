@@ -93,7 +93,7 @@ handlers._users.post = (data, callback) => {
 // Users - get
 // Required data: phone
 // Optional data: None
-// @TODO: Only let an authorized user access their object. Don't let them access anyone else data
+// @TODO: 
 handlers._users.get = (data, callback) => {
   // Check that the phone number is valid
   var phone =
@@ -103,15 +103,23 @@ handlers._users.get = (data, callback) => {
       : false;
 
   if (phone) {
-
-    // Lookup he user
-    _data.read("users", phone, (err, data) => {
-      if (!err && data) {
-        // remove the hashed password from the user object before returning it to the requester
-        delete data.hashedPassword;
-        callback(200, data);
+    // Get the token from the headers
+    var token =
+      typeof data.headers.token == "string" ? data.headers.token : false;
+    handlers._tokens.verifyToken(token, phone, tokenIsValid => {
+      if (tokenIsValid) {
+        // Lookup he user
+        _data.read("users", phone, (err, data) => {
+          if (!err && data) {
+            // remove the hashed password from the user object before returning it to the requester
+            delete data.hashedPassword;
+            callback(200, data);
+          } else {
+            callback(400, { Error: "User not found" });
+          }
+        });
       } else {
-        callback(400, { Error: "User not found" });
+        callback(403, { Error: "Missing required token in header, or" });
       }
     });
   } else {

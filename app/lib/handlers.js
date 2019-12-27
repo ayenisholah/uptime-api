@@ -613,7 +613,101 @@ handlers._checks.get = (data, callback) => {
   }
 };
 
+// Checks - put
+// Required data : checkId
+// Optional data: method, url,protocol, successCodes, timeoutSeconds (atleast one must be specified)
+handlers._checks.put = (data, callback) => {
+  // Check for the required string
+  var checkId =
+    typeof data.payload.checkId == "string" &&
+    data.payload.checkId.trim().length == 20
+      ? data.payload.checkId.trim()
+      : false;
+  // Check for optional fields
+  var protocol =
+    typeof data.payload.protocol == "string" &&
+    ["https", "http"].indexOf(data.payload.protocol) > -1
+      ? data.payload.protocol
+      : false;
 
+  var url =
+    typeof data.payload.url == "string" && data.payload.url.trim().length > 0
+      ? data.payload.url
+      : false;
+
+  var method =
+    typeof data.payload.method == "string" &&
+    ["post", "get", "put", "delete"].indexOf(data.payload.method) > -1
+      ? data.payload.method
+      : false;
+
+  var successCodes =
+    typeof data.payload.successCodes == "object" &&
+    data.payload.successCodes instanceof Array &&
+    data.payload.successCodes.length > 0
+      ? data.payload.successCodes
+      : false;
+
+  var timeoutSeconds =
+    typeof data.payload.timeoutSeconds == "number" &&
+    data.payload.timeoutSeconds % 1 === 0 &&
+    data.payload.timeoutSeconds >= 1 &&
+    data.payload.timeoutSeconds <= 5
+      ? data.payload.timeoutSeconds
+      : false;
+
+  // Error if the checkId is invalid
+  if (checkId) {
+    // Error if nothing is sent to update
+    if (protocol || method || url || successCodes || timeoutSeconds) {
+      _data.read("checks", checkId, (err, checkData) => {
+        if (!err && checkData) {
+          // Get token from header
+          var token =
+            typeof data.headers.token == "string" ? data.headers.token : false;
+          // Verify that the token is valid and belongs to the user who created the check
+          handlers._tokens.verifyToken(token, checkData.phone, tokenIsValid => {
+            if (tokenIsValid) {
+              // Update the check where necessary
+              if (protocol) {
+                checkData.protocol = protocol;
+              }
+              if (method) {
+                checkData.method = method;
+              }
+              if (url) {
+                checkData.url = url;
+              }
+              if (successCodes) {
+                checkData.successCodes = successCodes;
+              }
+              if (timeoutSeconds) {
+                checkData.timeoutSeconds = timeoutSeconds;
+              }
+
+              // Store the update
+              _data.update("checks", checkId, checkData, err => {
+                if (!err) {
+                  callback(200, { Message: "Check updated successfully" });
+                } else {
+                  callback(500, { Error: "Could not update check" });
+                }
+              });
+            } else {
+              callback(403, { Error: "Invalid token" });
+            }
+          });
+        } else {
+          callback(403, { Error: "Unauthorized" });
+        }
+      });
+    } else {
+      callback(400, { Error: "Missing field to update" });
+    }
+  } else {
+    callback(400, { Error: "Missing required field" });
+  }
+};
 
 // Ping handler
 handlers.ping = (data, callback) => {

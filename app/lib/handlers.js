@@ -218,6 +218,71 @@ handlers._users.delete = (data, callback) => {
   }
 };
 
+// Tokens
+handlers.tokens = (data, callback) => {
+  var acceptableMethod = ["post", "get", "put", "delete"];
+  if (acceptableMethod.indexOf(data.method) > -1) {
+    handlers._tokens[data.method](data, callback);
+  } else {
+    callback(405);
+  }
+};
+
+// Container for all the token methods
+handlers._tokens = {};
+
+// Tokens - post
+// Required data: phone, password
+// Optional data: none
+handlers._tokens.post = (data, callback) => {
+  var phone =
+    typeof data.payload.phone == "string" &&
+    data.payload.phone.trim().length == 10
+      ? data.payload.phone.trim()
+      : false;
+  var password =
+    typeof data.payload.password == "string" &&
+    data.payload.password.trim().length > 0
+      ? data.payload.password.trim()
+      : false;
+
+  if (phone && password) {
+    // Lookup the user who matches that phone number
+    _data.read("users", phone, (err, userData) => {
+      if (!err && userData) {
+        // Hash the sent password and compare it with the password stored in the user
+        var hashedPassword = helpers.hash(password);
+        if (hashedPassword == userData.hashedPassword) {
+          // If valid, create a new token with a randome name and 1hr expiration date
+          var tokenID = helpers.createRandomString(20);
+          var expires = Date.now() + 1000 * 60 * 60;
+          var tokenObject = {
+            phone: phone,
+            id: tokenID,
+            expires: expires
+          };
+
+          // Store the token
+          _data.create("tokens", tokenID, tokenObject, err => {
+            if (!err) {
+              callback(200, tokenObject);
+            } else {
+              callback(500, { Error: "could not create the token" });
+            }
+          });
+        } else {
+          callback(400, { Error: "Incorrect password" });
+        }
+      } else {
+        callback(400, { Error: "could not find the specified user" });
+      }
+    });
+  } else {
+    callback(400, { Error: "missing required field(s)" });
+  }
+};
+
+
 // Ping handler
 handlers.ping = (data, callback) => {
   callback(200);

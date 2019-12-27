@@ -309,7 +309,54 @@ handlers._tokens.get = (data, callback) => {
 };
 
 // Tokens - put
-handlers._tokens.put = (data, callback) => {};
+// Required data: id, extend
+// Optional data: none
+handlers._tokens.put = (data, callback) => {
+  var id =
+    typeof data.payload.id == "string" && data.payload.id.trim().length == 20
+      ? data.payload.id.trim()
+      : false;
+  var extend =
+    typeof data.payload.extend == "boolean" && data.payload.extend == true
+      ? true
+      : false;
+
+  if (id && extend) {
+    // Look up the token
+    _data.read("tokens", id, (err, tokenData) => {
+      if (!err && tokenData) {
+        // Check to make sure the token isn't already expired
+        if (tokenData.expires > Date.now()) {
+          // Set the expiration date 1 hr from now
+          tokenData.expires = Date.now() + 1000 * 60 * 60;
+
+          // store the new update
+          _data.update("tokens", id, tokenData, err => {
+            if (!err) {
+              callback(200, {
+                Message: "Token expiration successfully extended by 1 hour"
+              });
+            } else {
+              callback(500, {
+                Error: "Could not update the token's expiration date"
+              });
+            }
+          });
+        } else {
+          callback(400, {
+            Error: "The token has already expired, and cannot be extended"
+          });
+        }
+      } else {
+        callback(400, { Error: "Specified token does not exist" });
+      }
+    });
+  } else {
+    callback(400, {
+      Error: "Missing required field(s) or field(s) are invalid"
+    });
+  }
+};
 
 // Tokens - delete
 handlers._tokens.delete = (data, callback) => {};

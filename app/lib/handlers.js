@@ -570,6 +570,51 @@ handlers._checks.post = (data, callback) => {
   }
 };
 
+// Checks - get
+// required data: id,
+// Optional data: none
+
+handlers._checks.get = (data, callback) => {
+  // Check that the ID is valid
+  var checkId =
+    typeof data.queryString.checkId == "string" &&
+    data.queryString.checkId.trim().length == 20
+      ? data.queryString.checkId.trim()
+      : false;
+
+  if (checkId) {
+    // Lookup the check
+    _data.read("checks", checkId, (err, checkData) => {
+      if (!err && checkData) {
+        // Verify that the given token is valid and belongs to the user who created the check
+        handlers._tokens.verifyToken(
+          token,
+          checkData.userPhone,
+          tokenIsValid => {
+            if (tokenIsValid) {
+              //  return the check data
+              callback(200, checkData);
+            } else {
+              callback(403, {
+                Error: "Missing required token in header, or invalid token"
+              });
+            }
+          }
+        );
+      } else {
+        callback(400, { Error: "Check not found" });
+      }
+    });
+    // Get the token from the headers
+    var token =
+      typeof data.headers.token == "string" ? data.headers.token : false;
+  } else {
+    callback(400, { Error: "Missing required field" });
+  }
+};
+
+
+
 // Ping handler
 handlers.ping = (data, callback) => {
   callback(200);

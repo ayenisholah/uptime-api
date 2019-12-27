@@ -93,7 +93,7 @@ handlers._users.post = (data, callback) => {
 // Users - get
 // Required data: phone
 // Optional data: None
-// @TODO: 
+// @TODO:
 handlers._users.get = (data, callback) => {
   // Check that the phone number is valid
   var phone =
@@ -160,30 +160,41 @@ handlers._users.put = (data, callback) => {
   if (phone) {
     // Error if nothing is sent to update
     if (firstName || lastName || password) {
-      // Lookup the user
-      _data.read("users", phone, (err, userData) => {
-        if (!err && userData) {
-          // Update the neccessary field
-          if (firstName) {
-            userData.firstName = firstName;
-          }
-          if (lastName) {
-            userData.lastName = lastName;
-          }
-          if (password) {
-            userData.hashedPassword = helpers.hash(password);
-          }
-          // Store the new update
-          _data.update("users", phone, userData, err => {
-            if (!err) {
-              callback(200, { Message: "User updated successfully" });
+      var token =
+        typeof data.headers.token == "string" ? data.headers.token : false;
+
+      handlers._tokens.verifyToken(token, phone, tokenIsValid => {
+        if (tokenIsValid) {
+          // Lookup the user
+          _data.read("users", phone, (err, userData) => {
+            if (!err && userData) {
+              // Update the neccessary field
+              if (firstName) {
+                userData.firstName = firstName;
+              }
+              if (lastName) {
+                userData.lastName = lastName;
+              }
+              if (password) {
+                userData.hashedPassword = helpers.hash(password);
+              }
+              // Store the new update
+              _data.update("users", phone, userData, err => {
+                if (!err) {
+                  callback(200, { Message: "User updated successfully" });
+                } else {
+                  console.log(err);
+                  callback(500, { Error: "Could not update the user" });
+                }
+              });
             } else {
-              console.log(err);
-              callback(500, { Error: "Could not update the user" });
+              callback(400, { Error: "The specified user does not exist" });
             }
           });
         } else {
-          callback(400, { Error: "The specified user does not exist" });
+          callback(403, {
+            Error: "Missing required token in header, or invalid token"
+          });
         }
       });
     } else {

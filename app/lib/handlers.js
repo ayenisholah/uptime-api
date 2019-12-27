@@ -103,6 +103,7 @@ handlers._users.get = (data, callback) => {
       : false;
 
   if (phone) {
+
     // Lookup he user
     _data.read("users", phone, (err, data) => {
       if (!err && data) {
@@ -359,7 +360,37 @@ handlers._tokens.put = (data, callback) => {
 };
 
 // Tokens - delete
-handlers._tokens.delete = (data, callback) => {};
+// Required data: id
+// Optional data: none
+handlers._tokens.delete = (data, callback) => {
+  // Check that the phone number is valid
+  var id =
+    typeof data.queryString.id == "string" &&
+    data.queryString.id.trim().length == 20
+      ? data.queryString.id.trim()
+      : false;
+
+  if (id) {
+    // Lookup the token
+    _data.read("tokens", id, (err, data) => {
+      if (!err && data) {
+        _data.delete("tokens", id, (err, data) => {
+          if (!err) {
+            callback(200, { Message: "token deleted successfully" });
+          } else {
+            callback(500, { error: "could not delete the specified token" });
+          }
+        });
+      } else {
+        callback(400, { Error: "Could not find the specified token" });
+      }
+    });
+  } else {
+    callback(400, { Error: "Missing required field" });
+  }
+};
+
+
 
 // Ping handler
 handlers.ping = (data, callback) => {

@@ -390,7 +390,22 @@ handlers._tokens.delete = (data, callback) => {
   }
 };
 
-
+// Verify that a given token id is currently valid for a given user
+handlers._tokens.verifyToken = (id, phone, callback) => {
+  // Lookup the token
+  _data.read("tokens", id, (err, tokenData) => {
+    if (!err && tokenData) {
+      // Check that the token is for the given user and has not expired
+      if (tokenData.phone == phone && tokenData.expires > Date.now()) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    } else {
+      callback(false);
+    }
+  });
+};
 
 // Ping handler
 handlers.ping = (data, callback) => {

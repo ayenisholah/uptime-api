@@ -10,7 +10,8 @@ environments.staging = {
   httpPort: 7777,
   httpsPort: 7778,
   envName: "staging",
-  hashingSecret: "ThisIsASecret"
+  hashingSecret: "ThisIsASecret",
+  maxChecks: 5
 };
 
 // production environmnet
@@ -19,7 +20,8 @@ environments.production = {
   httpPort: 8888,
   httpsPort: 8889,
   envName: "production",
-  hashingSecret: "ThisIsAlsoASecret"
+  hashingSecret: "ThisIsAlsoASecret",
+  maxChecks: 5
 };
 
 // Determine which one to be exported out

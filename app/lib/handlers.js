@@ -282,6 +282,37 @@ handlers._tokens.post = (data, callback) => {
   }
 };
 
+// Tokens - get
+// Required data: id
+// Optional data: none
+handlers._tokens.get = (data, callback) => {
+  // Check that the id sent is valid
+  var id =
+    typeof data.queryString.id == "string" &&
+    data.queryString.id.trim().length == 20
+      ? data.queryString.id.trim()
+      : false;
+
+  if (id) {
+    // Lookup the token
+    _data.read("tokens", id, (err, tokenData) => {
+      if (!err && tokenData) {
+        // remove the hashed password from the user object before returning it to the requester
+        callback(200, tokenData);
+      } else {
+        callback(400, { Error: "token not found" });
+      }
+    });
+  } else {
+    callback(400, { Error: "invalid token" });
+  }
+};
+
+// Tokens - put
+handlers._tokens.put = (data, callback) => {};
+
+// Tokens - delete
+handlers._tokens.delete = (data, callback) => {};
 
 // Ping handler
 handlers.ping = (data, callback) => {

@@ -11,17 +11,26 @@ environments.staging = {
   httpsPort: 7778,
   envName: "staging",
   hashingSecret: "ThisIsASecret",
-  maxChecks: 5
+  maxChecks: 5,
+  twilio: {
+    accountSid: "AC78615daa2c4d19fd05b0c4e2f730e230",
+    authToken: "5da6e4cc489840a9f4149080e6bafc8a",
+    fromPhone: "+19892832574"
+  }
 };
 
 // production environmnet
-
 environments.production = {
   httpPort: 8888,
   httpsPort: 8889,
   envName: "production",
   hashingSecret: "ThisIsAlsoASecret",
-  maxChecks: 5
+  maxChecks: 5,
+  twilio: {
+    accountSid: "AC0e40eac3492b2f45146b5c168d19cb39",
+    authToken: "ab2b7164fadba98efa30cc2df8091bb5",
+    fromPhone: "+19892832574"
+  }
 };
 
 // Determine which one to be exported out

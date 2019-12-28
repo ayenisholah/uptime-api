@@ -111,3 +111,69 @@ workers.validateCheckData = function(originalCheckData) {
     );
   }
 };
+
+// Perform the check, send the originalCheck data and the outcome of the check process to the next step in the process
+workers.performCheck = function(originalCheckData) {
+  // Prepare the intial check outcome
+  var checkOutcome = {
+    error: false,
+    responseCode: false
+  };
+
+  // Mark that the outcome has not been sent yet
+  var outcomeSent = false;
+
+  // Parse the hostname and path out of the originalCheckData
+  var parsedUrl = url.parse(
+    originalCheckData.protocol + "://" + originalCheckData.url,
+    true
+  );
+  var hostName = parsedUrl.hostname;
+  var path = parsedUrl.path; // Using path not pathname because we want the query string
+
+  // Construct the request
+  var requestDetails = {
+    protocol: originalCheckData.protocol + ":",
+    hostname: hostName,
+    method: originalCheckData.method.toUpperCase(),
+    path: path,
+    timeout: originalCheckData.timeoutSeconds * 1000
+  };
+
+  // Instantiate the request object (using either the http or https module)
+  var _moduleToUse = originalCheckData.protocol == "http" ? http : https;
+  var req = _moduleToUse.request(requestDetails, function(res) {
+    // Grab the status of the sent request
+    var status = res.statusCode;
+
+    // Update the checkOutcome and pass the data along
+    checkOutcome.responseCode = status;
+    if (!outcomeSent) {
+      workers.processCheckOutcome(originalCheckData, checkOutcome);
+      outcomeSent = true;
+    }
+  });
+
+  // Bind to the error event so it doesn't get thrown
+  req.on("error", function(e) {
+    // Update the checkOutcome and pass the data along
+    checkOutcome.error = { error: true, value: e };
+    if (!outcomeSent) {
+      workers.processCheckOutcome(originalCheckData, checkOutcome);
+      outcomeSent = true;
+    }
+  });
+
+  // Bind to the timeout event
+  req.on("timeout", function() {
+    // Update the checkOutcome and pass the data along
+    checkOutcome.error = { error: true, value: "timeout" };
+    if (!outcomeSent) {
+      workers.processCheckOutcome(originalCheckData, checkOutcome);
+      outcomeSent = true;
+    }
+  });
+
+  // End the request
+  req.end();
+};

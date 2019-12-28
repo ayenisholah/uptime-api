@@ -23,9 +23,12 @@ server.httpsServerOptions = {
   key: fs.readFileSync(path.join(__dirname, "/../https/key.pem")),
   cert: fs.readFileSync(path.join(__dirname, "/../https/cert.pem"))
 };
-server.httpsServer = https.createServer(server.httpsServerOptions, (req, res) => {
-  server.unifiedServer(req, res);
-});
+server.httpsServer = https.createServer(
+  server.httpsServerOptions,
+  (req, res) => {
+    server.unifiedServer(req, res);
+  }
+);
 
 // All the server logic for both http and https server
 server.unifiedServer = (req, res) => {
@@ -85,7 +88,7 @@ server.unifiedServer = (req, res) => {
       res.writeHead(statusCode);
       res.end(payloadString);
       // log the response
-      console.log("Returning this response: ", statusCode, payloadString);
+      console.log("Returning this response: ", stastusCode, payloadString);
     });
   });
 };
@@ -103,6 +106,7 @@ server.init = () => {
   // Start the HTTP server
   server.httpServer.listen(config.httpPort, () => {
     console.log(
+      "\x1b[36m%s\x1b[0m",
       `Magic happening on ${config.httpPort} in ${config.envName} mode`
     );
   });
@@ -110,6 +114,7 @@ server.init = () => {
   // Start the HTTPS server
   server.httpsServer.listen(config.httpsPort, () => {
     console.log(
+      "\x1b[35m%s\x1b[0m",
       `Magic happening on ${config.httpsPort} in ${config.envName} mode`
     );
   });

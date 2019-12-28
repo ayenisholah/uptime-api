@@ -57,7 +57,7 @@ server.unifiedServer = (req, res) => {
     // Choose the router this request should go to. If route does not exist, use th notFoundHandler
     var chosenHandler =
       typeof server.router[trimmedPath] !== "undefined"
-        ? router[trimmedPath]
+        ? server.router[trimmedPath]
         : handlers.notFound;
 
     // construct data to send to the chosen hander

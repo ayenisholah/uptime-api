@@ -76,7 +76,7 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
     // Configure the request payload
     var payload = {
       From: config.twilio.fromPhone,
-      To: `+234${phone}`,
+      To: "+234" + phone,
       Body: msg
     };
 
@@ -88,8 +88,9 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
       protocol: "https:",
       hostname: "api.twilio.com",
       method: "POST",
-      path: `/2010-04-01/Accounts${config.twilio.accountSid}/Messages.json`,
-      auth: `${config.twilio.accountSid}:${config.twilio.authToken}`,
+      path:
+        "/2010-04-01/Accounts/" + config.twilio.accountSid + "/Messages.json",
+      auth: config.twilio.accountSid + ":" + config.twilio.authToken,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         "Content-Length": Buffer.byteLength(stringPayload)

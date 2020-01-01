@@ -61,6 +61,45 @@ handlers.favicon = (data, callback) => {
   }
 };
 
+// Public
+handlers.public = (data, callback) => {
+  // Reject any method that isn't a get
+  if (data.method == "get") {
+    // Get the file name being requested
+    var trimmedAssetName = data.trimmedPath.replace("public/", "").trim();
+    if (trimmedAssetName.length > 0) {
+      helpers.getStaticAsset(trimmedAssetName, (err, data) => {
+        if (!err && data) {
+          // Determine the content type and default to plain text
+          var contentType = "plain";
+
+          if (trimmedAssetName.indexOf(".css") > -1) {
+            contentType = "css";
+          }
+          if (trimmedAssetName.indexOf(".png") > -1) {
+            contentType = "png";
+          }
+          if (trimmedAssetName.indexOf(".jpg") > -1) {
+            contentType = "jpg";
+          }
+          if (trimmedAssetName.indexOf(".ico") > -1) {
+            contentType = "favicon";
+          }
+
+          // Callback the data
+          callback(200, data, contentType);
+        } else {
+          callback(500);
+        }
+      });
+    } else {
+      callback(400);
+    }
+  } else {
+    callback(405);
+  }
+};
+
 /**
  * JSON API Handlers
  */

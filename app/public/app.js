@@ -153,3 +153,22 @@ app.bindForms = () => {
     );
   });
 };
+
+// Form response processor
+app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
+  var functionToCall = false;
+  if (formId == "accountCreate") {
+    // @TODO Do something here now that the account has been created successfully
+  }
+};
+
+// Init (bootstrapping)
+app.init = () => {
+  // Bind all form submissions
+  app.bindForms();
+};
+
+// Call the init processes after the window loads
+window.onload = () => {
+  app.init();
+};

@@ -8,6 +8,44 @@ var config = require("./config");
 
 // Define handlers
 var handlers = {};
+/**
+ * HTML Handlers
+ */
+// Index handlers
+handlers.index = (data, callback) => {
+  // Rehect any request that isn't a get
+  if (data.method == "get") {
+    // Prepare data for interpolation
+    var templateData = {
+      "head.title": "This is the title",
+      "head.description": "This is the meta description",
+      "body.title": "Hello templated world",
+      "body.class": "index"
+    };
+    // read the index template as a string
+    helpers.getTemplate("index", templateData, (err, string) => {
+      if (!err && string) {
+        // Add the universal templates
+        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
+          if (!err && fullString) {
+            // return the page as html
+            callback(200, fullString, "html");
+          } else {
+            callback(500, undefined, "html");
+          }
+        });
+      } else {
+        console.log(err);
+        callback(500, undefined, "html");
+      }
+    });
+  } else {
+    callback(405, undefined, "html");
+  }
+};
+/**
+ * JSON API Handlers
+ */
 
 // Users
 handlers.users = (data, callback) => {
@@ -41,6 +79,7 @@ handlers._users.post = (data, callback) => {
     data.payload.phone.trim().length == 10
       ? data.payload.phone.trim()
       : false;
+
   var password =
     typeof data.payload.password == "string" &&
     data.payload.password.trim().length > 0
@@ -159,7 +198,7 @@ handlers._users.put = (data, callback) => {
       ? data.payload.password.trim()
       : false;
 
-  // Error if the phone is invalid
+  // Error if the email is invalid
   if (phone) {
     // Error if nothing is sent to update
     if (firstName || lastName || password) {
@@ -292,7 +331,7 @@ handlers.tokens = (data, callback) => {
   if (acceptableMethod.indexOf(data.method) > -1) {
     handlers._tokens[data.method](data, callback);
   } else {
-    callback(405);
+    callback(405, { sucess: false, error: "method not allowed" });
   }
 };
 
@@ -323,7 +362,7 @@ handlers._tokens.post = (data, callback) => {
         if (hashedPassword == userData.hashedPassword) {
           // If valid, create a new token with a randome name and 1hr expiration date
           var tokenID = helpers.createRandomString(20);
-          var expires = Date.now() + 1000 * 60 * 60;
+          var expires = new Date(Date.now() + 1000 * 60 * 60);
           var tokenObject = {
             phone: phone,
             id: tokenID,
@@ -365,7 +404,6 @@ handlers._tokens.get = (data, callback) => {
     // Lookup the token
     _data.read("tokens", id, (err, tokenData) => {
       if (!err && tokenData) {
-        // remove the hashed password from the user object before returning it to the requester
         callback(200, tokenData);
       } else {
         callback(400, { Error: "token not found" });

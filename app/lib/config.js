@@ -16,6 +16,12 @@ environments.staging = {
     accountSid: "AC78615daa2c4d19fd05b0c4e2f730e230",
     authToken: "5da6e4cc489840a9f4149080e6bafc8a",
     fromPhone: "+19892832574"
+  },
+  templateGlobals: {
+    appName: "Uptime Monitor",
+    companyName: "Pirple, Node Masterclass",
+    yearCreated: "2018",
+    baseUrl: "http://localhost:7777"
   }
 };
 
@@ -30,6 +36,12 @@ environments.production = {
     accountSid: "AC0e40eac3492b2f45146b5c168d19cb39",
     authToken: "ab2b7164fadba98efa30cc2df8091bb5",
     fromPhone: "+19892832574"
+  },
+  templateGlobals: {
+    appName: "Uptime Monitor",
+    companyName: "Pirple, Node Masterclass",
+    yearCreated: "2018",
+    baseUrl: "http://localhost:8888"
   }
 };
 

@@ -43,6 +43,24 @@ handlers.index = (data, callback) => {
     callback(405, undefined, "html");
   }
 };
+
+// FAVICON
+handlers.favicon = (data, callback) => {
+  // Reject any method that isn't a get
+  if (data.method == "get") {
+    // Read in the favicon's data
+    helpers.getStaticAsset("favicon.ico", (err, data) => {
+      if (!err && data) {
+        callback(200, data, "favicon");
+      } else {
+        callback(500);
+      }
+    });
+  } else {
+    callback(405);
+  }
+};
+
 /**
  * JSON API Handlers
  */

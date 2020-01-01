@@ -65,6 +65,10 @@ server.unifiedServer = (req, res) => {
         ? server.router[trimmedPath]
         : handlers.notFound;
 
+    // If the request is in the public directory, use the public handler
+    chosenHandler =
+      trimmedPath.indexOf("public/") > -1 ? handlers.public : chosenHandler;
+
     // construct data to send to the chosen hander
     var data = {
       trimmedPath: trimmedPath,
@@ -90,10 +94,29 @@ server.unifiedServer = (req, res) => {
         payload = typeof payload == "object" ? payload : {};
         payloadString = JSON.stringify(payload);
       }
-
       if (contentType == "html") {
         res.setHeader("Content-Type", "text/html");
         payloadString = typeof payload == "string" ? payload : "";
+      }
+      if (contentType == "favicon") {
+        res.setHeader("Content-Type", "image/x-icon");
+        payloadString = typeof payload !== "undefined" ? payload : "";
+      }
+      if (contentType == "css") {
+        res.setHeader("Content-Type", "text/css");
+        payloadString = typeof payload !== "undefined" ? payload : "";
+      }
+      if (contentType == "png") {
+        res.setHeader("Content-Type", "image/png");
+        payloadString = typeof payload !== "undefined" ? payload : "";
+      }
+      if (contentType == "jpg") {
+        res.setHeader("Content-Type", "image/jpg");
+        payloadString = typeof payload !== "undefined" ? payload : "";
+      }
+      if (contentType == "plain") {
+        res.setHeader("Content-Type", "text/plain");
+        payloadString = typeof payload !== "undefined" ? payload : "";
       }
       // Return he response -partsthat are common to all content types
       res.writeHead(statusCode);
@@ -127,6 +150,8 @@ server.router = {
   "api/users": handlers.users,
   "api/tokens": handlers.tokens,
   "api/checks": handlers.checks,
+  "favicon.ico": handlers.favicon,
+  public: handlers.public,
   ping: handlers.ping
 };
 

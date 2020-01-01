@@ -12,6 +12,8 @@ var StringDecoder = require("string_decoder").StringDecoder;
 var config = require("./config");
 var handlers = require("./handlers");
 var helpers = require("./helpers");
+var util = require("util");
+var debug = util.debuglog("foo");
 
 var server = {};
 
@@ -73,32 +75,59 @@ server.unifiedServer = (req, res) => {
     };
 
     // Route the request to the handler specified in the router
-    chosenHandler(data, (statusCode, payload) => {
+    chosenHandler(data, (statusCode, payload, contentType) => {
+      // Determine the type of response (fallback to JSON)
+      contentType = typeof contentType == "string" ? contentType : "json";
+
       // use the status code called back by the handler, or default to 200
       statusCode = typeof statusCode == "number" ? statusCode : 200;
 
-      // use the payload called back by the handler, or default to an empty object
-      payload = typeof payload == "object" ? payload : {};
+      //return the response part that are content specific
+      var payloadString = "";
 
-      //convert the payload to a string
-      var payloadString = JSON.stringify(payload);
+      if (contentType == "json") {
+        res.setHeader("Content-Type", "application/json");
+        payload = typeof payload == "object" ? payload : {};
+        payloadString = JSON.stringify(payload);
+      }
 
-      // Return the response
-      res.setHeader("Content-Type", "application/json");
+      if (contentType == "html") {
+        res.setHeader("Content-Type", "text/html");
+        payloadString = typeof payload == "string" ? payload : "";
+      }
+      // Return he response -partsthat are common to all content types
       res.writeHead(statusCode);
       res.end(payloadString);
-      // log the response
-      console.log("Returning this response: ", stastusCode, payloadString);
+
+      if (statusCode == 200) {
+        debug(
+          "\x1b[32m%s\x1b[0m",
+          method.toUpperCase() + " /" + trimmedPath + statusCode
+        );
+      } else {
+        debug(
+          "\x1b[31m%s\x1b[0m",
+          method.toUpperCase() + " /" + trimmedPath + statusCode
+        );
+      }
     });
   });
 };
 
 // Define a request router
 server.router = {
-  ping: handlers.ping,
-  users: handlers.users,
-  tokens: handlers.tokens,
-  checks: handlers.checks
+  "": handlers.index,
+  "account/create": handlers.accountCreate,
+  "account/deleted": handlers.accountDelete,
+  "session/create": handlers.sessionCreate,
+  "session/deleted": handlers.sessionDeleted,
+  "checks/all": handlers.checksList,
+  "checks/create": handlers.checksCreate,
+  "checks/edit": handlers.checksEdit,
+  "api/users": handlers.users,
+  "api/tokens": handlers.tokens,
+  "api/checks": handlers.checks,
+  ping: handlers.ping
 };
 
 // Initialize script

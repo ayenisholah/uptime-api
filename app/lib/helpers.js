@@ -181,5 +181,29 @@ helpers.addUniversalTemp = (str, data, callback) => {
     }
   });
 };
+
+// Take a given string and a data object, and find/replace all the strings in it
+helpers.interpolate = (str, data) => {
+  str = typeof str == "string" && str.length > 0 ? str : "";
+  data = typeof data == "object" && data != null ? data : "";
+
+  // Add the templateGlobals to the data object, prepending their key namewith global
+  for (let keyname in config.templateGlobals) {
+    if (config.templateGlobals.hasOwnProperty(keyname)) {
+      data["global." + keyname] = config.templateGlobals[keyname];
+    }
+  }
+
+  // For each key in the data object, insert its value into he string t the coressponding placeholder
+  for (let key in data) {
+    if (data.hasOwnProperty(key) && typeof data[key] == "string") {
+      var replace = data[key];
+      var find = "{" + key + "}";
+      str = str.replace(find, replace);
+    }
+  }
+  return str;
+};
+
 // Export the container
 module.exports = helpers;

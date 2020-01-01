@@ -17,13 +17,45 @@ handlers.index = (data, callback) => {
   if (data.method == "get") {
     // Prepare data for interpolation
     var templateData = {
-      "head.title": "This is the title",
-      "head.description": "This is the meta description",
-      "body.title": "Hello templated world",
+      "head.title": "Uptime Monotoring - Made Simple",
+      "head.description":
+        "We offer free, simple uptime monitoring for HTTP/HTTPS sites all kinds. When your site goes down, we'll send you a text to let you know",
       "body.class": "index"
     };
     // read the index template as a string
     helpers.getTemplate("index", templateData, (err, string) => {
+      if (!err && string) {
+        // Add the universal templates
+        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
+          if (!err && fullString) {
+            // return the page as html
+            callback(200, fullString, "html");
+          } else {
+            callback(500, undefined, "html");
+          }
+        });
+      } else {
+        console.log(err);
+        callback(500, undefined, "html");
+      }
+    });
+  } else {
+    callback(405, undefined, "html");
+  }
+};
+
+// Create Account
+handlers.accountCreate = (data, callback) => {
+  // Rehect any request that isn't a get
+  if (data.method == "get") {
+    // Prepare data for interpolation
+    var templateData = {
+      "head.title": "Create and account",
+      "head.description": "sign up is easy and only takes a few seconds",
+      "body.class": "accountCreate"
+    };
+    // read the index template as a string
+    helpers.getTemplate("accountCreate", templateData, (err, string) => {
       if (!err && string) {
         // Add the universal templates
         helpers.addUniversalTemp(string, templateData, (err, fullString) => {

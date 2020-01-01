@@ -7,6 +7,8 @@ var crypto = require("crypto");
 var config = require("./config");
 var https = require("https");
 var querystring = require("querystring");
+var path = require("path");
+var fs = require("fs");
 
 // Container for helpers
 var helpers = {};
@@ -125,5 +127,32 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
   }
 };
 
+// Get the string content of a template
+helpers.getTemplate = (templateName, data, callback) => {
+  templateName =
+    typeof templateName == "string" && templateName.length > 0
+      ? templateName
+      : false;
+  data = typeof data == "object" && data != null ? data : "";
+
+  if (templateName) {
+    var templateDirectory = path.join(__dirname, "/../templates/");
+    fs.readFile(
+      templateDirectory + templateName + ".html",
+      "utf8",
+      (err, str) => {
+        if (!err && str && str.length > 0) {
+          // Do the interpolation on the string before returning it
+          var finalString = helpers.interpolate(str, data);
+          callback(false, finalString);
+        } else {
+          callback("No template could be found");
+        }
+      }
+    );
+  } else {
+    callback("A valid template name was not specified");
+  }
+};
 // Export the container
 module.exports = helpers;

@@ -11,19 +11,19 @@ app.config = {
   sessionToken: false
 };
 
-// AJAX Client for RESTful API
+// AJAX Client (for RESTful API)
 app.client = {};
 
-// Interface for making api calls
-app.client.request = (
+// Interface for making API calls
+app.client.request = function(
   headers,
   path,
   method,
   queryStringObject,
   payload,
   callback
-) => {
-  // Set default parameters
+) {
+  // Set defaults
   headers = typeof headers == "object" && headers !== null ? headers : {};
   path = typeof path == "string" ? path : "/";
   method =
@@ -31,7 +31,6 @@ app.client.request = (
     ["POST", "GET", "PUT", "DELETE"].indexOf(method.toUpperCase()) > -1
       ? method.toUpperCase()
       : "GET";
-
   queryStringObject =
     typeof queryStringObject == "object" && queryStringObject !== null
       ? queryStringObject
@@ -42,11 +41,10 @@ app.client.request = (
   // For each query string parameter sent, add it to the path
   var requestUrl = path + "?";
   var counter = 0;
-
   for (var queryKey in queryStringObject) {
     if (queryStringObject.hasOwnProperty(queryKey)) {
       counter++;
-      // If atleast one querystring parameter has already been added, prepend new querystring paramenter with ambersand
+      // If at least one query string parameter has already been added, preprend new ones with an ampersand
       if (counter > 1) {
         requestUrl += "&";
       }
@@ -58,7 +56,7 @@ app.client.request = (
   // Form the http request as a JSON type
   var xhr = new XMLHttpRequest();
   xhr.open(method, requestUrl, true);
-  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.setRequestHeader("Content-type", "application/json");
 
   // For each header sent, add it to the request
   for (var headerKey in headers) {
@@ -67,13 +65,13 @@ app.client.request = (
     }
   }
 
-  // If there is a current sessionToken set, add that as a header
+  // If there is a current session token set, add that as a header
   if (app.config.sessionToken) {
     xhr.setRequestHeader("token", app.config.sessionToken.id);
   }
 
   // When the request comes back, handle the response
-  xhr.onreadystatechange = () => {
+  xhr.onreadystatechange = function() {
     if (xhr.readyState == XMLHttpRequest.DONE) {
       var statusCode = xhr.status;
       var responseReturned = xhr.responseText;
@@ -96,8 +94,8 @@ app.client.request = (
 };
 
 // Bind the forms
-app.bindForms = () => {
-  document.querySelector("form").addEventListener("submit", e => {
+app.bindForms = function() {
+  document.querySelector("form").addEventListener("submit", function(e) {
     // Stop it from submitting
     e.preventDefault();
     var formId = this.id;
@@ -122,40 +120,34 @@ app.bindForms = () => {
     }
 
     // Call the API
-    app.client.request(
-      undefined,
-      path,
-      method,
-      undefined,
-      payload,
-      (statusCode, responsePayload) => {
-        // Display an error on the form if needed
-        if (statusCode !== 200) {
-          // Try to get the error from the api, or set a default error message
-          var error =
-            typeof responsePayload.Error == "string"
-              ? responsePayload.Error
-              : "An error has occured, please try again";
+    app.client.request(undefined, path, method, undefined, payload, function(
+      statusCode,
+      responsePayload
+    ) {
+      // Display an error on the form if needed
+      if (statusCode !== 200) {
+        // Try to get the error from the api, or set a default error message
+        var error =
+          typeof responsePayload.Error == "string"
+            ? responsePayload.Error
+            : "An error has occured, please try again";
 
-          // Set the formError field with the error text
-          document.querySelector(
-            "#" + formId + " .formError"
-          ).innerHTML = error;
+        // Set the formError field with the error text
+        document.querySelector("#" + formId + " .formError").innerHTML = error;
 
-          // Show (unhide) the form error field on the form
-          document.querySelector("#" + formId + " .formError").style.display =
-            "block";
-        } else {
-          // If successful, send to form response processor
-          app.formResponseProcessor(formId, payload, responsePayload);
-        }
+        // Show (unhide) the form error field on the form
+        document.querySelector("#" + formId + " .formError").style.display =
+          "block";
+      } else {
+        // If successful, send to form response processor
+        app.formResponseProcessor(formId, payload, responsePayload);
       }
-    );
+    });
   });
 };
 
 // Form response processor
-app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
+app.formResponseProcessor = function(formId, requestPayload, responsePayload) {
   var functionToCall = false;
   if (formId == "accountCreate") {
     // @TODO Do something here now that the account has been created successfully
@@ -163,12 +155,12 @@ app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
 };
 
 // Init (bootstrapping)
-app.init = () => {
+app.init = function() {
   // Bind all form submissions
   app.bindForms();
 };
 
 // Call the init processes after the window loads
-window.onload = () => {
+window.onload = function() {
   app.init();
 };

@@ -154,5 +154,32 @@ helpers.getTemplate = (templateName, data, callback) => {
     callback("A valid template name was not specified");
   }
 };
+
+// Add the universal header and footer string
+
+helpers.addUniversalTemp = (str, data, callback) => {
+  templateName =
+    typeof templateName == "string" && templateName.length > 0
+      ? templateName
+      : false;
+  data = typeof data == "object" && data != null ? data : "";
+
+  // Get headers
+  helpers.getTemplate("_header", data, (err, headerString) => {
+    if (!err && headerString) {
+      // Get footer
+      helpers.getTemplate("_footer", data, (err, footerString) => {
+        if (!err && footerString) {
+          var fullString = headerString + str + footerString;
+          callback(false, fullString);
+        } else {
+          callback("could not get the header templatex");
+        }
+      });
+    } else {
+      callback("could not get the header templatex");
+    }
+  });
+};
 // Export the container
 module.exports = helpers;

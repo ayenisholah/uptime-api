@@ -285,6 +285,16 @@ app.renewToken = function(callback) {
   }
 };
 
+// Loop to renew token often
+app.tokenRenewalLoop = function() {
+  setInterval(function() {
+    app.renewToken(function(err) {
+      if (!err) {
+        console.log("Token renewed successfully @ " + Date.now());
+      }
+    });
+  }, 1000 * 60);
+};
 
 // Init (bootstrapping)
 app.init = function() {

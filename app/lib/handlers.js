@@ -76,6 +76,38 @@ handlers.accountCreate = (data, callback) => {
   }
 };
 
+// session creation
+handlers.sessionCreate = (data, callback) => {
+  // Rehect any request that isn't a get
+  if (data.method == "get") {
+    // Prepare data for interpolation
+    var templateData = {
+      "head.title": "Log in into your account",
+      "head.description": "please enter your phone number and password to login",
+      "body.class": "sessionCreate"
+    };
+    // read the index template as a string
+    helpers.getTemplate("sessionCreate", templateData, (err, string) => {
+      if (!err && string) {
+        // Add the universal templates
+        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
+          if (!err && fullString) {
+            // return the page as html
+            callback(200, fullString, "html");
+          } else {
+            callback(500, undefined, "html");
+          }
+        });
+      } else {
+        console.log(err);
+        callback(500, undefined, "html");
+      }
+    });
+  } else {
+    callback(405, undefined, "html");
+  }
+};
+
 // FAVICON
 handlers.favicon = (data, callback) => {
   // Reject any method that isn't a get

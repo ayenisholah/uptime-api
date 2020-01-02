@@ -142,6 +142,7 @@ server.router = {
   "": handlers.index,
   "account/create": handlers.accountCreate,
   "account/deleted": handlers.accountDelete,
+  "account/edit": handlers.accountEdit,
   "session/create": handlers.sessionCreate,
   "session/deleted": handlers.sessionDeleted,
   "checks/all": handlers.checksList,

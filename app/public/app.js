@@ -300,6 +300,12 @@ app.tokenRenewalLoop = function() {
 app.init = function() {
   // Bind all form submissions
   app.bindForms();
+
+  // Get the token from localstorage
+  app.getSessionToken();
+
+  // Renew token
+  app.tokenRenewalLoop();
 };
 
 // Call the init processes after the window loads

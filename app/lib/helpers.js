@@ -157,7 +157,7 @@ helpers.getTemplate = (templateName, data, callback) => {
 
 // Add the universal header and footer string
 
-helpers.addUniversalTemp = (str, data, callback) => {
+helpers.addUniversalTemplates = (str, data, callback) => {
   templateName =
     typeof templateName == "string" && templateName.length > 0
       ? templateName

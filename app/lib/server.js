@@ -142,18 +142,18 @@ server.router = {
   "": handlers.index,
   "account/create": handlers.accountCreate,
   "account/edit": handlers.accountEdit,
-  "account/deleted": handlers.accountDelete,
+  "account/deleted": handlers.accountDeleted,
   "session/create": handlers.sessionCreate,
   "session/deleted": handlers.sessionDeleted,
   "checks/all": handlers.checksList,
   "checks/create": handlers.checksCreate,
   "checks/edit": handlers.checksEdit,
+  ping: handlers.ping,
   "api/users": handlers.users,
   "api/tokens": handlers.tokens,
   "api/checks": handlers.checks,
   "favicon.ico": handlers.favicon,
-  public: handlers.public,
-  ping: handlers.ping
+  public: handlers.public
 };
 
 // Initialize script

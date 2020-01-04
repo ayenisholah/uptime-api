@@ -26,14 +26,18 @@ handlers.index = (data, callback) => {
     helpers.getTemplate("index", templateData, (err, string) => {
       if (!err && string) {
         // Add the universal templates
-        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
-          if (!err && fullString) {
-            // return the page as html
-            callback(200, fullString, "html");
-          } else {
-            callback(500, undefined, "html");
+        helpers.addUniversalTemplates(
+          string,
+          templateData,
+          (err, fullString) => {
+            if (!err && fullString) {
+              // return the page as html
+              callback(200, fullString, "html");
+            } else {
+              callback(500, undefined, "html");
+            }
           }
-        });
+        );
       } else {
         console.log(err);
         callback(500, undefined, "html");
@@ -58,14 +62,18 @@ handlers.accountCreate = (data, callback) => {
     helpers.getTemplate("accountCreate", templateData, (err, string) => {
       if (!err && string) {
         // Add the universal templates
-        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
-          if (!err && fullString) {
-            // return the page as html
-            callback(200, fullString, "html");
-          } else {
-            callback(500, undefined, "html");
+        helpers.addUniversalTemplates(
+          string,
+          templateData,
+          (err, fullString) => {
+            if (!err && fullString) {
+              // return the page as html
+              callback(200, fullString, "html");
+            } else {
+              callback(500, undefined, "html");
+            }
           }
-        });
+        );
       } else {
         console.log(err);
         callback(500, undefined, "html");
@@ -91,14 +99,18 @@ handlers.sessionCreate = (data, callback) => {
     helpers.getTemplate("sessionCreate", templateData, (err, string) => {
       if (!err && string) {
         // Add the universal templates
-        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
-          if (!err && fullString) {
-            // return the page as html
-            callback(200, fullString, "html");
-          } else {
-            callback(500, undefined, "html");
+        helpers.addUniversalTemplates(
+          string,
+          templateData,
+          (err, fullString) => {
+            if (!err && fullString) {
+              // return the page as html
+              callback(200, fullString, "html");
+            } else {
+              callback(500, undefined, "html");
+            }
           }
-        });
+        );
       } else {
         console.log(err);
         callback(500, undefined, "html");
@@ -123,14 +135,18 @@ handlers.sessionDeleted = (data, callback) => {
     helpers.getTemplate("sessionCreate", templateData, (err, string) => {
       if (!err && string) {
         // Add the universal templates
-        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
-          if (!err && fullString) {
-            // return the page as html
-            callback(200, fullString, "html");
-          } else {
-            callback(500, undefined, "html");
+        helpers.addUniversalTemplates(
+          string,
+          templateData,
+          (err, fullString) => {
+            if (!err && fullString) {
+              // return the page as html
+              callback(200, fullString, "html");
+            } else {
+              callback(500, undefined, "html");
+            }
           }
-        });
+        );
       } else {
         console.log(err);
         callback(500, undefined, "html");
@@ -141,29 +157,28 @@ handlers.sessionDeleted = (data, callback) => {
   }
 };
 
-// Edit your account
+// Edit Your Account
 handlers.accountEdit = (data, callback) => {
-  // Rehect any request that isn't a get
+  // Reject any request that isn't a GET
   if (data.method == "get") {
     // Prepare data for interpolation
     var templateData = {
       "head.title": "Account Settings",
       "body.class": "accountEdit"
     };
-    // read the index template as a string
-    helpers.getTemplate("accountEdit", templateData, (err, string) => {
-      if (!err && string) {
-        // Add the universal templates
-        helpers.addUniversalTemp(string, templateData, (err, fullString) => {
-          if (!err && fullString) {
-            // return the page as html
-            callback(200, fullString, "html");
+    // Read in a template as a string
+    helpers.getTemplate("accountEdit", templateData, (err, str) => {
+      if (!err && str) {
+        // Add the universal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            // Return that page as HTML
+            callback(200, str, "html");
           } else {
             callback(500, undefined, "html");
           }
         });
       } else {
-        console.log(err);
         callback(500, undefined, "html");
       }
     });
@@ -215,6 +230,36 @@ handlers.accountDeleted = (data, callback) => {
     };
     // Read in a template as a string
     helpers.getTemplate("accountDeleted", templateData, (err, str) => {
+      if (!err && str) {
+        // Add the universal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            // Return that page as HTML
+            callback(200, str, "html");
+          } else {
+            callback(500, undefined, "html");
+          }
+        });
+      } else {
+        callback(500, undefined, "html");
+      }
+    });
+  } else {
+    callback(405, undefined, "html");
+  }
+};
+
+// Create a new check
+handlers.checksCreate = (data, callback) => {
+  // Reject any request that isn't a GET
+  if (data.method == "get") {
+    // Prepare data for interpolation
+    var templateData = {
+      "head.title": "Create a New Check",
+      "body.class": "checksCreate"
+    };
+    // Read in a template as a string
+    helpers.getTemplate("checksCreate", templateData, (err, str) => {
       if (!err && str) {
         // Add the universal header and footer
         helpers.addUniversalTemplates(str, templateData, (err, str) => {

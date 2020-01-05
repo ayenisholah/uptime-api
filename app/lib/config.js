@@ -21,7 +21,7 @@ environments.staging = {
     appName: "Uptime Monitor",
     companyName: "Pirple, Node Masterclass",
     yearCreated: "2018",
-    baseUrl: "http://localhost:7777"
+    baseUrl: "http://localhost:7777/"
   }
 };
 
@@ -41,7 +41,7 @@ environments.production = {
     appName: "Uptime Monitor",
     companyName: "Pirple, Node Masterclass",
     yearCreated: "2018",
-    baseUrl: "http://localhost:8888"
+    baseUrl: "http://localhost:8888/"
   }
 };
 

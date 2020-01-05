@@ -121,42 +121,6 @@ handlers.sessionCreate = (data, callback) => {
   }
 };
 
-// session delete
-handlers.sessionDeleted = (data, callback) => {
-  // Rehect any request that isn't a get
-  if (data.method == "get") {
-    // Prepare data for interpolation
-    var templateData = {
-      "head.title": "Log out",
-      "head.description": "you have been logged out of your account",
-      "body.class": "sessionDeleted"
-    };
-    // read the index template as a string
-    helpers.getTemplate("sessionCreate", templateData, (err, string) => {
-      if (!err && string) {
-        // Add the universal templates
-        helpers.addUniversalTemplates(
-          string,
-          templateData,
-          (err, fullString) => {
-            if (!err && fullString) {
-              // return the page as html
-              callback(200, fullString, "html");
-            } else {
-              callback(500, undefined, "html");
-            }
-          }
-        );
-      } else {
-        console.log(err);
-        callback(500, undefined, "html");
-      }
-    });
-  } else {
-    callback(405, undefined, "html");
-  }
-};
-
 // Edit Your Account
 handlers.accountEdit = (data, callback) => {
   // Reject any request that isn't a GET
@@ -422,38 +386,35 @@ handlers._users.post = (data, callback) => {
   }
 };
 
-// Users - get
 // Required data: phone
-// Optional data: None
+// Optional data: none
 handlers._users.get = (data, callback) => {
-  // Check that the phone number is valid
+  // Check that phone number is valid
   var phone =
-    typeof data.queryString.phone == "string" &&
-    data.queryString.phone.trim().length == 10
-      ? data.queryString.phone.trim()
+    typeof data.queryStringObject.phone == "string" &&
+    data.queryStringObject.phone.trim().length == 10
+      ? data.queryStringObject.phone.trim()
       : false;
-
   if (phone) {
-    // Get the token from the headers
+    // Get token from headers
     var token =
       typeof data.headers.token == "string" ? data.headers.token : false;
-
     // Verify that the given token is valid for the phone number
     handlers._tokens.verifyToken(token, phone, tokenIsValid => {
       if (tokenIsValid) {
-        // Lookup he user
+        // Lookup the user
         _data.read("users", phone, (err, data) => {
           if (!err && data) {
-            // remove the hashed password from the user object before returning it to the requester
+            // Remove the hashed password from the user user object before returning it to the requester
             delete data.hashedPassword;
             callback(200, data);
           } else {
-            callback(400, { Error: "User not found" });
+            callback(404);
           }
         });
       } else {
-        callback(403, {
-          Error: "Missing required token in header, or invalid token"
+        callback(400, {
+          Error: "buggy"
         });
       }
     });
@@ -462,18 +423,17 @@ handlers._users.get = (data, callback) => {
   }
 };
 
-// Users - put
-// Required data : phone
-// Optional data: firstName, lastName, password (atleast one must be specified)
+// Required data: phone
+// Optional data: firstName, lastName, password (at least one must be specified)
 handlers._users.put = (data, callback) => {
-  // Check for the required string
+  // Check for required field
   var phone =
     typeof data.payload.phone == "string" &&
     data.payload.phone.trim().length == 10
       ? data.payload.phone.trim()
       : false;
 
-  // Check for the optional field
+  // Check for optional fields
   var firstName =
     typeof data.payload.firstName == "string" &&
     data.payload.firstName.trim().length > 0
@@ -490,19 +450,21 @@ handlers._users.put = (data, callback) => {
       ? data.payload.password.trim()
       : false;
 
-  // Error if the email is invalid
+  // Error if phone is invalid
   if (phone) {
     // Error if nothing is sent to update
     if (firstName || lastName || password) {
+      // Get token from headers
       var token =
         typeof data.headers.token == "string" ? data.headers.token : false;
 
+      // Verify that the given token is valid for the phone number
       handlers._tokens.verifyToken(token, phone, tokenIsValid => {
         if (tokenIsValid) {
           // Lookup the user
           _data.read("users", phone, (err, userData) => {
             if (!err && userData) {
-              // Update the neccessary field
+              // Update the fields if necessary
               if (firstName) {
                 userData.firstName = firstName;
               }
@@ -512,30 +474,29 @@ handlers._users.put = (data, callback) => {
               if (password) {
                 userData.hashedPassword = helpers.hash(password);
               }
-              // Store the new update
+              // Store the new updates
               _data.update("users", phone, userData, err => {
                 if (!err) {
-                  callback(200, { Message: "User updated successfully" });
+                  callback(200);
                 } else {
-                  console.log(err);
-                  callback(500, { Error: "Could not update the user" });
+                  callback(500, { Error: "Could not update the user." });
                 }
               });
             } else {
-              callback(400, { Error: "The specified user does not exist" });
+              callback(400, { Error: "Specified user does not exist." });
             }
           });
         } else {
           callback(403, {
-            Error: "Missing required token in header, or invalid token"
+            Error: "Missing required token in header, or token is invalid."
           });
         }
       });
     } else {
-      callback(400, { Error: "Missing field to update" });
+      callback(400, { Error: "Missing fields to update." });
     }
   } else {
-    callback(400, { Error: "Missing required field" });
+    callback(400, { Error: "Missing required field." });
   }
 };
 
@@ -545,9 +506,9 @@ handlers._users.put = (data, callback) => {
 handlers._users.delete = (data, callback) => {
   // Check that phone number is valid
   var phone =
-    typeof data.queryString.phone == "string" &&
-    data.queryString.phone.trim().length == 10
-      ? data.queryString.phone.trim()
+    typeof data.queryStringObject.phone == "string" &&
+    data.queryStringObject.phone.trim().length == 10
+      ? data.queryStringObject.phone.trim()
       : false;
   if (phone) {
     // Get token from headers
@@ -555,13 +516,13 @@ handlers._users.delete = (data, callback) => {
       typeof data.headers.token == "string" ? data.headers.token : false;
 
     // Verify that the given token is valid for the phone number
-    handlers._tokens.verifyToken(token, phone, function(tokenIsValid) {
+    handlers._tokens.verifyToken(token, phone, tokenIsValid => {
       if (tokenIsValid) {
         // Lookup the user
-        _data.read("users", phone, function(err, userData) {
+        _data.read("users", phone, (err, userData) => {
           if (!err && userData) {
             // Delete the user's data
-            _data.delete("users", phone, function(err) {
+            _data.delete("users", phone, err => {
               if (!err) {
                 // Delete each of the checks associated with the user
                 var userChecks =
@@ -574,9 +535,9 @@ handlers._users.delete = (data, callback) => {
                   var checksDeleted = 0;
                   var deletionErrors = false;
                   // Loop through the checks
-                  userChecks.forEach(function(checkId) {
+                  userChecks.forEach(checkId => {
                     // Delete the check
-                    _data.delete("checks", checkId, function(err) {
+                    _data.delete("checks", checkId, err => {
                       if (err) {
                         deletionErrors = true;
                       }
@@ -654,7 +615,7 @@ handlers._tokens.post = (data, callback) => {
         if (hashedPassword == userData.hashedPassword) {
           // If valid, create a new token with a randome name and 1hr expiration date
           var tokenID = helpers.createRandomString(20);
-          var expires = new Date(Date.now() + 1000 * 60 * 60);
+          var expires = Date.now() + 1000 * 60 * 60;
           var tokenObject = {
             phone: phone,
             id: tokenID,
@@ -687,9 +648,9 @@ handlers._tokens.post = (data, callback) => {
 handlers._tokens.get = (data, callback) => {
   // Check that the id sent is valid
   var id =
-    typeof data.queryString.id == "string" &&
-    data.queryString.id.trim().length == 20
-      ? data.queryString.id.trim()
+    typeof data.queryStringObject.id == "string" &&
+    data.queryStringObject.id.trim().length == 20
+      ? data.queryStringObject.id.trim()
       : false;
 
   if (id) {
@@ -762,9 +723,9 @@ handlers._tokens.put = (data, callback) => {
 handlers._tokens.delete = (data, callback) => {
   // Check that the phone number is valid
   var id =
-    typeof data.queryString.id == "string" &&
-    data.queryString.id.trim().length == 20
-      ? data.queryString.id.trim()
+    typeof data.queryStringObject.id == "string" &&
+    data.queryStringObject.id.trim().length == 20
+      ? data.queryStringObject.id.trim()
       : false;
 
   if (id) {
@@ -938,9 +899,9 @@ handlers._checks.post = (data, callback) => {
 handlers._checks.get = (data, callback) => {
   // Check that the ID is valid
   var checkId =
-    typeof data.queryString.checkId == "string" &&
-    data.queryString.checkId.trim().length == 20
-      ? data.queryString.checkId.trim()
+    typeof data.queryStringObject.checkId == "string" &&
+    data.queryStringObject.checkId.trim().length == 20
+      ? data.queryStringObject.checkId.trim()
       : false;
 
   if (checkId) {
@@ -1077,9 +1038,9 @@ handlers._checks.put = (data, callback) => {
 handlers._checks.delete = (data, callback) => {
   // Check that the phone number is valid
   var checkId =
-    typeof data.queryString.checkId == "string" &&
-    data.queryString.checkId.trim().length == 20
-      ? data.queryString.checkId.trim()
+    typeof data.queryStringObject.checkId == "string" &&
+    data.queryStringObject.checkId.trim().length == 20
+      ? data.queryStringObject.checkId.trim()
       : false;
 
   if (checkId) {

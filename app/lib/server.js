@@ -42,7 +42,7 @@ server.unifiedServer = (req, res) => {
   var trimmedPath = path.replace(/^\/+|\/+$/g, "");
 
   // Get query string as an object
-  var queryString = parsedUrl.query;
+  var queryStringObject = parsedUrl.query;
 
   // Get the HTTP Method
   var method = req.method.toLowerCase();
@@ -72,7 +72,7 @@ server.unifiedServer = (req, res) => {
     // construct data to send to the chosen hander
     var data = {
       trimmedPath: trimmedPath,
-      queryString: queryString,
+      queryStringObject: queryStringObject,
       method: method,
       headers: headers,
       payload: helpers.parseJsonToObject(buffer)
